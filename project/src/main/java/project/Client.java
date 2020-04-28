@@ -40,6 +40,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+import com.opencsv.CSVReader;
 
 public class Client {
 
@@ -53,6 +54,8 @@ public class Client {
 
 	public static void main(String args[]) throws FileNotFoundException {
 		try {
+			
+			Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
 			
 			Client client = new Client("mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority");
 			
@@ -233,10 +236,12 @@ public class Client {
 	 * connaissant son id.
 	 */
 	public void getClientById(String nomCollection, Integer ClientId) {
+		
+		MongoDatabase bd = mongoClient.getDatabase("airbase");
 		//Drop a collection
 		System.out.println("\n\n\n*********** dans getClientById *****************");
 
-		MongoCollection<Document> colClients = database.getCollection(nomCollection);
+		MongoCollection<Document> colClients = bd.getCollection(nomCollection);
 
 		//BasicDBObject whereQuery = new BasicDBObject();
 		Document whereQuery = new Document();
@@ -484,6 +489,47 @@ public class Client {
 	 * Trouver les bons param�tres.
 	 */
 
-	public void loadClientsFromCSVFile() {
+	public void loadClientsFromCSVFile(String path) {
+		// A compl�ter
+
+		List<Document> doc = new ArrayList<>();
+		//List<Person> personList = new ArrayList<>();
+		List<String[]> allRecords = new ArrayList<>();
+		List<JsonObject> objects = new ArrayList<>();
+		Gson gson= new Gson();
+
+		List<String[]> records = new ArrayList<>();
+		try (CSVReader csvReader = new CSVReader(new FileReader(path))) {
+
+			for (int i=0; i<=csvReader.getLinesRead(); i++ )
+			{
+				records.add(csvReader.readNext());
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+		String[] tab= records.get(0);
+
+		for (int j=0; j<records.size() -2; j++ ){
+			JsonObject person = new JsonObject();
+			for (int i=0; i<tab.length; i++ )
+			{
+				person.addProperty(records.get(0)[i], records.get(j+1)[i]);
+			}
+			objects.add(person);
+		}
+
+
+
+		for (int j = 0; j < objects.size() - 1; j++) {
+			String json = objects.get(j).toString();
+			//String json = first.toString();
+			Document myDoc = Document.parse(json);
+			doc.add(myDoc);
+		}
+		collection.insertMany(doc);
+
 	}
 }
