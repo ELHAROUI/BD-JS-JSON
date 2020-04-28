@@ -3,7 +3,9 @@ package project;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -19,40 +21,51 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
+
 
 public class Client {
+
+	private MongoDatabase database;
 	private MongoClient mongoClient;
 	private String dbName = "airbase";
 	private String ClientCollectionName = "clients";
-	private MongoDatabase database;
-    private MongoCollection<Document> collection;
+	private MongoCollection<Document> collection;
 
 	public static void main(String args[]) throws IOException, ParseException {
 		Client client = new Client();
 		//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
-		client.loadOneClientFromJsonFile("src/main/resources/Airbase.json",2);
+		client.loadOneClientFromJsonFile("src/main/resources/Airbase.json", 3);
 		client.mongoClient.close();
 
 	}
 
 	/**
-	 Constructeur Client.
-	 Dans ce constructeur sont effectu�es les activit�s suivantes:
-	 - Cr�ation d'une instance du client MongoClient
-	 - Cr�ation d'une BD Mongo appel� RH
-	 - Cr�ation d'un utilisateur appel�
-	 - Chargement du pointeur vers la base RH
+	 * Constructeur Client.
+	 * Dans ce constructeur sont effectu�es les activit�s suivantes:
+	 * - Cr�ation d'une instance du client MongoClient
+	 * - Cr�ation d'une BD Mongo appel� RH
+	 * - Cr�ation d'un utilisateur appel�
+	 * - Chargement du pointeur vers la base RH
 	 */
+
 	public Client() {
 
+
 		String mongodbUri = "mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
+
+
+		// liste des BDS
 
 		try {
 			Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
@@ -75,11 +88,12 @@ public class Client {
 			e.printStackTrace();
 		}
 
+
 	}
 
 	/**
-	 Cette fonction permet de cr�er une collection
-	 de nom nomCollection.
+	 * Cette fonction permet de cr�er une collection
+	 * de nom nomCollection.
 	 */
 	public void createCollectionClient(String nomCollection) {
 		//Creating a collection
@@ -89,8 +103,8 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de supprimer une collection
-	 de nom nomCollection.
+	 * Cette fonction permet de supprimer une collection
+	 * de nom nomCollection.
 	 */
 
 	public void dropCollectionClient(String nomCollection) {
@@ -113,7 +127,7 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet d'ins�rer un Departement dans une collection.
+	 * Cette fonction permet d'ins�rer un Departement dans une collection.
 	 */
 
 	public void insertOneClient(String nomCollection, Document client) {
@@ -124,7 +138,7 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de tester la m�thode insertOneClient.
+	 * Cette fonction permet de tester la m�thode insertOneClient.
 	 */
 
 	public void testInsertOneClient() {
@@ -138,7 +152,7 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet d'ins�rer plusieurs D�partements dans une collection
+	 * Cette fonction permet d'ins�rer plusieurs D�partements dans une collection
 	 */
 
 	public void insertManyClients(String nomCollection, List<Document> clients) {
@@ -149,16 +163,16 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de tester la fonction insertManyClients
+	 * Cette fonction permet de tester la fonction insertManyClients
 	 */
 
 	public void testInsertManyClients() {
 		List<Document> clients = Arrays.asList(
 				new Document("_id", 1).append("nom", "Martin").append("prenom", Arrays.asList("Aaron", "Frida"))
 						.append("telephone", "673212284").append("DateNaiss", "01/01/1980").append("adresse",
-								new Document("numero", 11).append("rue", "All�e Cavendish")
-										.append("codePostal", "06000").append("ville", "Nice")
-										.append("pays", "France")),
+						new Document("numero", 11).append("rue", "All�e Cavendish")
+								.append("codePostal", "06000").append("ville", "Nice")
+								.append("pays", "France")),
 
 				new Document("_id", 2).append("nom", "Bernard").append("prenom", Arrays.asList("Abel"))
 						.append("telephone", "673212285").append("DateNaiss", "05/05/1984")
@@ -208,8 +222,8 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de rechercher un d�partement dans une collection
-	 connaissant son id.
+	 * Cette fonction permet de rechercher un d�partement dans une collection
+	 * connaissant son id.
 	 */
 	public void getClientById(String nomCollection, Integer ClientId) {
 		//Drop a collection
@@ -232,10 +246,10 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de rechercher des d�partements dans une collection.
-	 Le param�tre whereQuery : permet de passer des conditions de rechercher
-	 Le param�tre projectionFields : permet d'indiquer les champs � afficher
-	 Le param�tre sortFields : permet d'indiquer les champs de tri.
+	 * Cette fonction permet de rechercher des d�partements dans une collection.
+	 * Le param�tre whereQuery : permet de passer des conditions de rechercher
+	 * Le param�tre projectionFields : permet d'indiquer les champs � afficher
+	 * Le param�tre sortFields : permet d'indiquer les champs de tri.
 	 */
 	public void getClients(String nomCollection, Document whereQuery, Document projectionFields, Document sortFields) {
 		//Drop a collection
@@ -253,14 +267,14 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de modifier des d�partements dans une collection.
-	 Le param�tre whereQuery : permet de passer des conditions de recherche
-	 Le param�tre updateExpressions : permet d'indiquer les champs � modifier
-	 Le param�tre UpdateOptions : permet d'indiquer les options de mise � jour :
-	 .upSert : ins�re si le document n'existe pas
+	 * Cette fonction permet de modifier des d�partements dans une collection.
+	 * Le param�tre whereQuery : permet de passer des conditions de recherche
+	 * Le param�tre updateExpressions : permet d'indiquer les champs � modifier
+	 * Le param�tre UpdateOptions : permet d'indiquer les options de mise � jour :
+	 * .upSert : ins�re si le document n'existe pas
 	 */
 	public void updateClients(String nomCollection, Document whereQuery, Document updateExpressions,
-			UpdateOptions updateOptions) {
+							  UpdateOptions updateOptions) {
 		//Drop a collection
 		System.out.println("\n\n\n*********** dans updateClients *****************");
 
@@ -282,8 +296,8 @@ public class Client {
 	}
 
 	/**
-	 Cette fonction permet de supprimer des d�partements dans une collection.
-	 Le param�tre filters : permet de passer des conditions de recherche des employ�s � supprimer
+	 * Cette fonction permet de supprimer des d�partements dans une collection.
+	 * Le param�tre filters : permet de passer des conditions de recherche des employ�s � supprimer
 	 */
 	public void deleteClients(String nomCollection, Document filters) {
 
@@ -303,7 +317,7 @@ public class Client {
 	}
 
 	/**
-	 Parcours un it�rateur et affiche les documents qui s'y trouvent
+	 * Parcours un it�rateur et affiche les documents qui s'y trouvent
 	 */
 	public void displayIterator(Iterator it, String message) {
 		System.out.println(" \n #### " + message + " ################################");
@@ -313,16 +327,25 @@ public class Client {
 	}
 
 	/**
-	 1.6.2 Afficher tous les clients habitant Une ville donn�es et ayant plus d'un prenom
-	 Trouver les bons param�tres.
+	 * 1.6.2 Afficher tous les clients habitant Une ville donn�es et ayant plus d'un prenom
+	 * Trouver les bons param�tres.
 	 */
-	public void findByTown() {
-		// A compl�ter
+	public void findByTown(String ville) {
+
+		MongoDatabase bd = mongoClient.getDatabase("airbase");
+		MongoCollection<Document> collection = bd.getCollection("clients");
+
+		List<Document> studentList = collection.find(eq("adresse.ville", ville)).into(new ArrayList<>());
+		System.out.println("Student list with an ArrayList:");
+		for (Document student : studentList) {
+			System.out.println(student);
+
+		}
 	}
 
 	/**
-	 1.6.3 Afficher les clients sans leurs adresses
-	 Trouver les bons param�tres.
+	 * 1.6.3 Afficher les clients sans leurs adresses
+	 * Trouver les bons param�tres.
 	 */
 
 	public void findClientWithOutAdress() {
@@ -330,18 +353,18 @@ public class Client {
 	}
 
 	/**
-	 .6.4 Afficher les informations sur 1 client ainsi que ses appr�ciations
-	 sur les vols
-	 Trouver les bons param�tres.
+	 * .6.4 Afficher les informations sur 1 client ainsi que ses appr�ciations
+	 * sur les vols
+	 * Trouver les bons param�tres.
 	 */
 	public void joinClientsVols() {
 		// A compl�ter
 	}
 
 	/**
-	 charger un document (client) JSON  depuis un fichier vers une collection mongoDB
-	 Cr�er pour cela un fichier contenant un seul json
-	 Trouver les bons param�tres.
+	 * charger un document (client) JSON  depuis un fichier vers une collection mongoDB
+	 * Cr�er pour cela un fichier contenant un seul json
+	 * Trouver les bons param�tres.
 	 */
 	public void loadOneClientFromJsonFile(String path, int position) throws IOException {
 		// A compl�ter
@@ -357,15 +380,14 @@ public class Client {
 		JsonParser jsonParser = new JsonParser();
 		JsonArray jsonArray = (JsonArray) jsonParser.parse(targetString);
 
-		if (position!=0)
-		{	JsonElement first= jsonArray.get(position-1);
-		    String json= first.toString();
-		    Document myDoc = Document.parse(json);
+		if (position != 0) {
+			JsonElement first = jsonArray.get(position - 1);
+			String json = first.toString();
+			Document myDoc = Document.parse(json);
 			collection.insertOne(myDoc);
-		}
-		else if (position==0) {
-			JsonElement first= jsonArray.get(position);
-			String json= first.toString();
+		} else if (position == 0) {
+			JsonElement first = jsonArray.get(position);
+			String json = first.toString();
 			Document myDoc = Document.parse(json);
 			collection.insertOne(myDoc);
 		}
@@ -374,9 +396,9 @@ public class Client {
 	}
 
 	/**
-	 charger plusieurs documents (clients) JSON depuis un fichier vers une collection mongoDB
-	 Utilisez le fichier 2Json_collection_Import_Clients_Airbase.json vu dans le cours
-	 Trouver les bons param�tres.
+	 * charger plusieurs documents (clients) JSON depuis un fichier vers une collection mongoDB
+	 * Utilisez le fichier 2Json_collection_Import_Clients_Airbase.json vu dans le cours
+	 * Trouver les bons param�tres.
 	 */
 	public void loadManyClientsFromJsonFile(String path) throws IOException {
 		// A compl�ter
@@ -394,31 +416,26 @@ public class Client {
 		JsonArray jsonArray = (JsonArray) jsonParser.parse(targetString);
 
 
-
-
-
-		for (int j=0; j <jsonArray.size() -1; j++){
-			JsonElement first= jsonArray.get(j);
-			String json= first.toString();
+		for (int j = 0; j < jsonArray.size() - 1; j++) {
+			JsonElement first = jsonArray.get(j);
+			String json = first.toString();
 			Document myDoc = Document.parse(json);
-		    doc.add(myDoc);
-	}
+			doc.add(myDoc);
+		}
 
-	   collection.insertMany(doc);
-
+		collection.insertMany(doc);
 
 
 		String str = "";
 	}
 
 	/**
-	 charger des clients contenu dans un fichier CSV vers une collection mongoDB
-	 Construisez un fichier CSV � partir du fichier json 2Json_collection_Import_Clients_Airbase
-	 Trouver les bons param�tres.
+	 * charger des clients contenu dans un fichier CSV vers une collection mongoDB
+	 * Construisez un fichier CSV � partir du fichier json 2Json_collection_Import_Clients_Airbase
+	 * Trouver les bons param�tres.
 	 */
 
 	public void loadClientsFromCSVFile() {
 		// A compl�ter
 	}
-
 }
