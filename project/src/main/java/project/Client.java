@@ -1,8 +1,11 @@
 package project;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.bson.Document;
 
@@ -21,11 +24,7 @@ public class Client {
 	private String ClientCollectionName = "clients";
 
 	public static void main(String args[]) {
-		try {
-			Client client = new Client();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		Client client = new Client();
 	}
 
 	/**
@@ -36,16 +35,19 @@ public class Client {
 	 - Cr�ation d'un utilisateur appel�
 	 - Chargement du pointeur vers la base RH
 	 */
-	Client() {
+	public Client() {
 
 		String mongodbUri = "mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
 
 		try {
+			Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
 			MongoClient mongoClient = MongoClients.create(mongodbUri);
-			for (String db : mongoClient.listDatabaseNames()) {
-				System.out.println(db);
+			List<Document> databases = mongoClient.listDatabases().into(new ArrayList());
+			for (Document db : databases) {
+				System.out.println(db.toJson());
 			}
 
+			mongoClient.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
