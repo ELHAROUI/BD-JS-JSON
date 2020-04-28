@@ -1,23 +1,29 @@
 package project;
 
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.exists;
+import static com.mongodb.client.model.Projections.elemMatch;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gson.Gson;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
+import com.google.gson.Gson;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
@@ -26,12 +32,15 @@ public class Client {
 	private String dbName = "airbase";
 	private String ClientCollectionName = "clients";
 	private MongoDatabase database;
-    private MongoCollection<Document> collection;
+	private MongoCollection<Document> collection;
+	private String volCollectionName = "vols";
 
 	public static void main(String args[]) throws FileNotFoundException {
 		Client client = new Client();
 		//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
 		//client.loadOneClientFromJsonFile("src/main/resources/Airbase.json");
+		//client.findClientWithOutAdress();
+		client.joinClientsVols(1);
 		client.mongoClient.close();
 
 	}
@@ -219,9 +228,9 @@ public class Client {
 		FindIterable<Document> listClient = colClients.find(whereQuery);
 
 		// Getting the iterator
-		Iterator it = listClient.iterator();
+		MongoCursor<Document> it = listClient.iterator();
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			System.out.println(it.next().toJson());
 		}
 	}
 
@@ -240,9 +249,9 @@ public class Client {
 		FindIterable<Document> listClient = colClients.find(whereQuery).sort(sortFields).projection(projectionFields);
 
 		// Getting the iterator
-		Iterator it = listClient.iterator();
+		MongoCursor<Document> it = listClient.iterator();
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			System.out.println(it.next().toJson());
 		}
 	}
 
@@ -283,7 +292,7 @@ public class Client {
 
 		System.out.println("\n\n\n*********** dans deleteClients *****************");
 		FindIterable<Document> listClient;
-		Iterator it;
+		MongoCursor<Document> it;
 		MongoCollection<Document> colClients = database.getCollection(nomCollection);
 
 		listClient = colClients.find(filters).sort(new Document("_id", 1));
@@ -299,10 +308,10 @@ public class Client {
 	/**
 	 Parcours un it�rateur et affiche les documents qui s'y trouvent
 	 */
-	public void displayIterator(Iterator it, String message) {
-		System.out.println(" \n #### " + message + " ################################");
+	public void displayIterator(MongoCursor<Document> it, String message) {
+		System.out.println(" \n ******  " + message + " ******");
 		while (it.hasNext()) {
-			System.out.println(it.next());
+			System.out.println(it.next().toJson());
 		}
 	}
 
@@ -320,7 +329,12 @@ public class Client {
 	 */
 
 	public void findClientWithOutAdress() {
-		// A compl�ter
+		FindIterable<Document> iterable = collection.find(exists("adresse", false));
+		MongoCursor<Document> cursor = iterable.iterator();
+		System.out.println("****** Clients without adresse ******");
+		while (cursor.hasNext()) {
+			System.out.println(cursor.next().toJson());
+		}
 	}
 
 	/**
@@ -328,8 +342,14 @@ public class Client {
 	 sur les vols
 	 Trouver les bons param�tres.
 	 */
-	public void joinClientsVols() {
-		// A compl�ter
+	public void joinClientsVols(Integer clientId) {
+		getClientById(ClientCollectionName, clientId);
+		MongoCollection<Document> vols = database.getCollection(volCollectionName);
+		Bson projection = Projections.fields(elemMatch("appreciations", eq("idClient", clientId))); // Add Projections
+		FindIterable<Document> iterable = vols.find().projection(projection);
+		MongoCursor<Document> cursor = iterable.iterator();
+
+		displayIterator(cursor, " Client Vols ");
 	}
 
 	/**
@@ -344,9 +364,9 @@ public class Client {
 		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
 		Gson gson = new Gson();
 
-			String json = gson.toJson(clientObj[0]);
-			Document myDoc = Document.parse(json);
-		    collection.insertOne(myDoc);
+		String json = gson.toJson(clientObj[0]);
+		Document myDoc = Document.parse(json);
+		collection.insertOne(myDoc);
 	}
 
 	/**
@@ -360,15 +380,14 @@ public class Client {
 
 		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
 		Gson gson = new Gson();
-		List<Document> doc = new ArrayList<>();
-		for (int j=0; j <clientObj.length; j++){
+		List<Document> doc = new ArrayList();
+		for (int j = 0; j < clientObj.length; j++) {
 			String json = gson.toJson(clientObj[j]);
 			Document myDoc = Document.parse(json);
 			doc.add(myDoc);
 		}
 
 		collection.insertMany(doc);
-		String str = "";
 	}
 
 	/**
@@ -380,5 +399,4 @@ public class Client {
 	public void loadClientsFromCSVFile() {
 		// A compl�ter
 	}
-
 }
