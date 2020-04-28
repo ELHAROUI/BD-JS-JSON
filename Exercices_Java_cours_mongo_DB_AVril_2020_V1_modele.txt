@@ -1,0 +1,184 @@
+*** Exercices Java mongoDB 2019/2020 ***********************************************
+
+
+*****************************************************
+1. Objectif du TP Java 
+
+Vous avez dans ce TP à implémenter ou tester au point 2 deux classes java :
+- La classe Employe.java
+- La classe Dept.java
+Ces classes doivent être définies dans un package appelé tp.
+
+Vous avez dans ce TP à implémenter ou tester au point 3 deux classes java :
+- La classe Client.java
+- La classe Vol.java
+Ces classes doivent être définies dans un package appelé tp.
+
+2. Partie 1 du TP Java
+2.1 Préparation de l'environnement
+
+2.1.1 Création de dossiers de travail
+
+Créer un dossier tpmongodb sur un disque ou vous avez de la place. 
+Dans ce dossier créer ensuite les sous-dossiers suivants :
+
+mongojar
+tp
+
+Le dossier mongojar contiendra le jar mongodb/mongo-java-driver/3
+Le dossier tp contiendra les classes Employe.java et Dept.java
+
+2.1.2 Installation du driver MongoDB JDBC
+
+Nous supposons que vous avez déjà installé java sur votre machine
+
+Télécharger mongo-java-driver-3.10.2.jar depuis ici :
+http://central.maven.org/maven2/org/mongodb/mongo-java-driver/3.10.2/. Placez ce jar dans le dossier tpmongodb\mongojar
+
+2.1.3 Définition des variables d'environnement
+
+Assurez que la variable d’environnement PATH contient le path java : ..\java\jdk-x.x.x\bin
+
+Définir une variable d’environnement comme suit :
+
+Set MYPATH=D:\tpmongodb
+
+2.1.4 Lignes de compilation
+
+-- Classe Employe.java
+-- Ligne de compilation de la classe Employe.java
+javac -g -cp %MYPATH%\mongojar\mongo-java-driver-3.10.2.jar;%MYPATH% %MYPATH%\tp\Employe.java
+
+-- Ligne d'exécution de la classe Employe.java
+
+java -Xmx256m -Xms256m -cp %MYPATH%\mongojar\mongo-java-driver-3.10.2.jar;%MYPATH% tp.Employe
+
+
+-- Classe Dept.java
+-- Ligne de compilation de la classe Employe.java
+javac -g -cp %MYPATH%\mongojar\mongo-java-driver-3.10.2.jar;%MYPATH% %MYPATH%\tp\Dept.java
+
+-- Ligne d'exécution de la classe Employe.java
+
+java -Xmx256m -Xms256m -cp %MYPATH%\mongojar\mongo-java-driver-3.10.2.jar;%MYPATH% tp.Dept
+
+
+2.2. La classe Dept.java
+
+Testez chacune des fonctions de ctte classe.
+
+/**
+La classe Dept.java contient les méthodes suivantes :
+
+  public void createCollectionDept(String nomCollection);
+   
+  public void dropCollectionDept(String nomCollection);
+   
+  public void insertOneDept(String nomCollection, Document dept);
+
+  public void testInsertOneDept();
+  
+  public void insertManyDepts(String nomCollection, List<Document> depts);
+
+  public void testInsertManyDepts();
+  
+  public void getDeptById(String nomCollection, Integer deptId);
+  
+  public void getDepts(String nomCollection, 
+	Document whereQuery, 
+	Document projectionFields,
+	Document sortFields);
+	
+  public void updateDepts(String nomCollection, 
+  	Document whereQuery, 
+	Document updateExpressions,
+	UpdateOptions updateOptions
+	);
+	
+  public void deleteDepts(String nomCollection, Document filters);
+
+  public void displayIterator(Iterator it, String message);
+
+Chaque méthode est décrite lors succintement dans la classe.
+
+*/
+
+
+2.3. La classe Employe.java
+
+Implémenter chacune des fonctions de cette classe.
+/**
+La classe Employe.java contient les méthodes suivantes :
+
+
+public void insertOneEmploye(String nomCollection, Document employe);
+
+public void testInsertOneEmploye();
+
+public void insertManyEmployes(String nomCollection, List<Document> employes);
+
+public void testInsertManyEmployes();
+
+public void getEmployeById(String nomCollection, Integer empId);
+
+public void getEmployes(String nomCollection, 
+	Document whereQuery, 
+	Document projectionFields,
+	Document sortFields);
+
+public void updateEmployes(String nomCollection, 
+	Document whereQuery, 
+	Document updateExpressions, UpdateOptions updateOptions);
+
+public void deleteEmployes(String nomCollection, Document filters);
+
+public void displayIterator(Iterator it, String message);   
+
+public void joinLocalAndforeignCollections(
+	String localCollectionName, 
+	String ForeignCollectionName, 
+	String localColJoinFieldName,
+	String foreigColJoinFieldName,
+	String filterFieldName,
+	String filterFieldType,
+	String filterFieldValue);
+
+public void groupByOnOneCollectionByJob(String localCollectionName);
+
+public void createEmployeIndexes(
+		String localCollectionName,
+		String indexName,
+		String indexFieldName1,
+		String indexFieldName2,
+		String indexFieldName3,
+		String indexType,
+		boolean isAscendingIndex,
+		boolean indexUnique);		
+
+public void getAllIndexesOfACollection(String localCollectionName);
+
+public void dropAIndexOfACollection(
+		String localCollectionName,
+		String indexName);
+
+Chaque méthode est décrite lors succintement dans la classe.
+
+3. Partie 2 du TP JAVA
+
+En s'inspirant de ce qui a été fait précédemment, veillez compléter les méthodes 
+des classes java Client et Vol.
+
+Dans la classes Client vous devez compléter les fonctions suivantes :
++++++++++++++++++++++++++++++++++++++++++ TRAVAIL A FAIRE : COMPLETER LES METHODES SUIVANTES ++++++++++++++++++++++++++++
+public void findByTown();
+public void findClientWithOutAdress();
+public void joinClientsVols();
+public void loadOneClientFromJsonFile();
+public void loadManyClientsFromJsonFile();
+public void loadClientsFromCSVFile();
+
+
+*/
+
+
+

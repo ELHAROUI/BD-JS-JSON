@@ -1,0 +1,305 @@
+*** Exercices mongoDB 2019 ***********************************************
+
+1. Exercices via le shell mongo
+ 
+Exercice 1.1 : 
+Créer une base de données appeler airbase et deux collections (clients, vols)
+
+?
+
+
+
+
+Exercice 1.2 :
+charger les documents contenus dans les fichiers (.js ou .json) dans vos collections
+vos collections créés précédemment
+
+
+
+-- Approche 1 : via la commande load qui exécute un .js
+-- dans lequel la commande db.collection.insertMay(...)
+-- 1Json_collection_Insert_Clients_Airbase.js
+-- 1Json_collection_Insert_Vols_Airbase.js
+
+?
+
+-- Approche 2 : via mongoimport JsonArray
+-- Les données sont dans les fichiers :
+-- 2Json_collection_Import_Clients_Airbase.json
+-- 2Json_collection_Import_Vols_Airbase.json
+?
+
+
+Exercice 1.3 :
+Ajouter un client et un vol dans les bonnes collections
+
+?
+
+Exercice 1.4 :
+Modifier le vol ajouté en 1.3 pour y ajouter les appréciations d'un des clients
+
+?
+
+Exercice 1.5 :
+Créer un index sur les champs ville, rue et numéro de l'adresse 
+d'un client
+
+?
+
+Exercice 1.6 : Divers consultations
+
+1.6.1 Afficher tous les clients
+
+-- sans formatage
+?
+-- Avec formatage
+?
+
+1.6.2 Afficher tous les clients habitant Nice et ayant plus d'un prenom
+
+-- Solution 1
+-- $size: 2 =  qui a exactement 2 elements dans l'array prenom
+?
+
+-- Solution 2
+-- plus de 2 elements dans dans l'array prenom
+
+?
+
+-- Solution 3
+-- Find all docs that have at least two prenom array elements.
+-- nomArray.1 correspond au 2ème élément. prenom[1]
+
+?
+-- Solution 4
+$nor effectue une opération NOR logique sur un tableau d'une 
+ou plusieurs expressions de requête et sélectionne les 
+documents qui échouent à toutes les expressions de requête 
+du tableau. Le $nor a la syntaxe suivante :
+
+?
+
+1.6.3 Afficher les clients sans leurs adresses
+
+?
+
+1.6.4 Afficher les informations sur 1 client ainsi que ses appréciations
+sur les vols ( coté serveur)
+
+?
+
+1.6.5 Afficher les clients qui habitent à une adresse 
+donnée (ville, rue, numero)
+
+?
+
+
+1.6.6 Visulisez aussi le plan d'exécution de la requête pour 
+voirs si l'index est utilisé
+
+?
+
+1.6.7a Afficher les clients dont les noms commencent par une 
+lettre donnée
+
+?
+
+1.6.7b Afficher les clients dont les noms finissent par une 
+lettre donnée
+
+?
+
+1.6.7c Afficher les clients dont les noms contiennent une 
+lettre donnée
+
+?
+
+1.6.7d Afficher les clients dont les noms contienncent une sous-chaîne
+
+?
+
+1.6.7e Afficher les clients dont les noms commencent avec une lettre
+et finissent avec une lettre
+
+?
+
+1.6.8 Supprimer le client fournit en 1.3
+
+?
+
+1.6.9 Trier les vols selon la date du vol. N'afficher 
+que : Nr vol, VD, VA, dataVol
+
+?
+
+1.6.10 Compter le nombre de notes par par vol, appreciation et note
+
+?
+
+
+1.7 Utilisation des validateurs 
+
+Créer une collection client2 et une collection vols2.
+
+Les collections doivent être associées au validateur pour chacun de vos 
+types de documents
+
+1) validateur pour les documents de type client :
+	- Tous les champs sont obligatoires
+	- Les string doivent être de type string
+	- Les champs numériques doivent être de type numérique
+	- L'année de naissance d'un client doit être de type date
+
+db.createCollection("clients1", {
+   validator: {
+      $jsonSchema: {
+         bsonType: "object",
+         required: [ "nom", "prenom", "telephone", "DateNaiss", "adresse.numero", "adresse.rue", "adresse.codePostal", "adresse.ville", "adresse.pays" ],
+         properties: {
+            nom: {
+               bsonType: "string",
+               description: "must be a string and is required"
+            },
+			 prenom: {
+               bsonType: "string",
+               description: "must be a string and is required"
+            },
+            telephone: {
+               bsonType: "string",
+               description: "must be a string and is not required"
+            },
+			DateNaiss: {
+               bsonType: "date",
+               description: "must be a string with date format YYYY-MM-DD and is not required"
+            },
+			"adresse.numero": {
+               bsonType: "int",
+               description: "must be an integer and is required"
+            },
+			"adresse.rue": {
+               bsonType: "string",
+               description: "must be a string and is not required"
+            },
+			"adresse.codePostal": {
+               bsonType: "string",
+               description: "must be a string and is not required"
+            },
+			"adresse.ville": {
+               bsonType: "string",
+               description: "must be a string and is not required"
+            },
+			"adresse.pays": {
+               bsonType: "string",
+               description: "must be a string and is not required"
+            }
+         }
+      }
+   }
+})
+	
+
+
+2) validateur pour les documents de type vol :
+	- Tous les champs sont obligatoires sauf les array
+	- Les string doivent être de type string
+	- Les champs numériques doivent être de type numérique
+	- Le champs critereANoter ne peut que les valeurs suivantes :
+		SiteWeb, Prix, Nourriture à bord, Qualité siège, 
+		Accueil guichet, Accueil à bord
+	- Le champs note ne peut prendre que les valeurs suivantes:
+		EXCELLENT, TRES_BIEN, BIEN, MOYEN, MEDIOCRE, PASSABLE
+		
+3) Insertion de documents
+Insérer deux clients et 3 vols.
+S'assurer que les contrôles des contraintes sont faites
+
+db.clients1.insertMany(
+[
+{
+   _id: 11,
+   nom: "Bond",
+   prenom:["James"],
+   telephone:"673212293",
+   DateNaiss:"03/02/1990",
+   adresse: {
+              numero: 20,
+			  rue:"queens avenue",
+			  codePostal: "EC4R 2SU",
+              ville: "Londres",
+              pays: "Royaune Uni"
+             }
+},
+{
+   _id: 12,
+   nom: "Kenny",
+   prenom:["Paul", "Hubert", "Valentin"],
+   telephone:"673212294",
+   DateNaiss:"03/02/1958",
+   adresse: {
+              numero: 20,
+			  rue:"Champs élysées",
+			  codePostal: "75008",
+              ville: "Paris",
+              pays: "France"
+             }
+}
+]
+);
+
+db.vols1.insertOne(
+  {
+      "_id":"121",
+      "villeDepart":"Paris",
+      "villeArrivee":"Nantes",
+      "heureDepart":"13:15",
+      "heureArrivee":"14:45",
+      "dateVol":"14/12/2019",
+      "appreciations":[
+         {
+            "idClient":"07",
+            "notes":[
+               {
+                  "apid":"071",
+                  "critereANoter":"SiteWeb",
+                  "note":"BIEN"
+               },
+               {
+                  "apid":"072",
+                  "critereANoter":"Prix",
+                  "note":"BIEN"
+               },
+               {
+                  "apid":"073",
+                  "critereANoter":"Nourritureàbord",
+                  "note":"BIEN"
+               },
+               {
+                  "apid":"074",
+                  "critereANoter":"Qualitésiège",
+                  "note":"BIEN"
+               },
+               {
+                  "apid":"075",
+                  "critereANoter":"Accueilguichet",
+                  "note":"BIEN"
+               },
+               {
+                  "apid":"076",
+                  "critereANoter":"Accueilàbord",
+                  "note":"EXCELLENT"
+               }
+            ]
+         }
+		]
+      
+  }
+);
+
+
+
+
+
+4) Mise à jour
+Modifier un clients et vérfier les contraintes
+
+
