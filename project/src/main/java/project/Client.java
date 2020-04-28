@@ -3,6 +3,7 @@ package project;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.bson.Document;
 
@@ -40,15 +41,31 @@ public class Client {
 
 		String mongodbUri = "mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
 
+		MongoClient mongoClient = MongoClients.create(mongodbUri);
+		
 		try {
-			MongoClient mongoClient = MongoClients.create(mongodbUri);
-			for (String db : mongoClient.listDatabaseNames()) {
+			
+			System.out.println(" ******* liste des BDs : *******");
+			for (String db : mongoClient.listDatabaseNames()) {			
 				System.out.println(db);
 			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		try {
+			
+			MongoDatabase database = mongoClient.getDatabase("airbase");	
+			System.out.println("******* liste des collections : ");
+		for (String coll : database.listCollectionNames()) {
+			
+			System.out.println(coll);
+		}
+
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
 
 	}
 
