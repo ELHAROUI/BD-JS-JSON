@@ -1,5 +1,6 @@
 package project;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -11,22 +12,35 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Filters.gte;
 
 public class Client {
+	
 	private MongoDatabase database;
 	private String dbName = "airbase";
+	MongoClient mongoClient;
 
 	private String ClientCollectionName = "clients";
 
 	public static void main(String args[]) {
 		try {
+			
 			Client client = new Client();
+			
+			// pour chercher selon la ville (Taper la ville souhaiter)
+			client.findByTown("Toulouse");
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
+		
 	}
 
 	/**
@@ -41,8 +55,9 @@ public class Client {
 
 		String mongodbUri = "mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
 
-		MongoClient mongoClient = MongoClients.create(mongodbUri);
+		mongoClient = MongoClients.create(mongodbUri);
 		
+		// liste des BDS
 		try {
 			
 			System.out.println(" ******* liste des BDs : *******");
@@ -54,20 +69,20 @@ public class Client {
 			e.printStackTrace();
 		}
 		
+		// liste des collections
 		try {
 			
 			MongoDatabase database = mongoClient.getDatabase("airbase");	
 			System.out.println("******* liste des collections : ");
-		for (String coll : database.listCollectionNames()) {
-			
+		for (String coll : database.listCollectionNames()) {			
 			System.out.println(coll);
 		}
 
-	} catch (Exception e) {
-		e.printStackTrace();
-	}
-
-	}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	
+		}
 
 	/**
 	 Cette fonction permet de cr�er une collection
@@ -308,8 +323,17 @@ public class Client {
 	 1.6.2 Afficher tous les clients habitant Une ville donn�es et ayant plus d'un prenom
 	 Trouver les bons param�tres.
 	 */
-	public void findByTown() {
-		// A compl�ter
+	public void findByTown(String ville) {
+		
+		MongoDatabase bd = mongoClient.getDatabase("airbase");
+		MongoCollection<Document> collection = bd.getCollection("clients");
+		
+		List<Document> studentList = collection.find(eq("adresse.ville", ville)).into(new ArrayList<>());
+		System.out.println("Student list with an ArrayList:");
+		for (Document student : studentList) {
+		    System.out.println(student);
+		    
+		}
 	}
 
 	/**
