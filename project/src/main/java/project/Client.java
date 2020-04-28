@@ -30,7 +30,8 @@ public class Client {
 
 	public static void main(String args[]) throws FileNotFoundException {
 		Client client = new Client();
-		client.loadManyClientsFromJsonFile();
+		//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
+		//client.loadOneClientFromJsonFile("src/main/resources/Airbase.json");
 		client.mongoClient.close();
 
 	}
@@ -336,8 +337,16 @@ public class Client {
 	 Cr�er pour cela un fichier contenant un seul json
 	 Trouver les bons param�tres.
 	 */
-	public void loadOneClientFromJsonFile() {
+	public void loadOneClientFromJsonFile(String path) throws FileNotFoundException {
 		// A compl�ter
+		BufferedReader reader = new BufferedReader(new FileReader(path));
+
+		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
+		Gson gson = new Gson();
+
+			String json = gson.toJson(clientObj[0]);
+			Document myDoc = Document.parse(json);
+		    collection.insertOne(myDoc);
 	}
 
 	/**
@@ -345,9 +354,9 @@ public class Client {
 	 Utilisez le fichier 2Json_collection_Import_Clients_Airbase.json vu dans le cours
 	 Trouver les bons param�tres.
 	 */
-	public void loadManyClientsFromJsonFile() throws FileNotFoundException {
+	public void loadManyClientsFromJsonFile(String path) throws FileNotFoundException {
 		// A compl�ter
-		BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/Airbase.json"));
+		BufferedReader reader = new BufferedReader(new FileReader(path));
 
 		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
 		Gson gson = new Gson();
