@@ -1,14 +1,8 @@
 
 
+import com.mongodb.*;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoCredential;
-import com.mongodb.DBObject;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DB;
 import org.bson.Document;
 import java.util.Arrays;
 import java.util.List;
@@ -29,49 +23,16 @@ import com.mongodb.client.model.BulkWriteOptions;
 
 public class Client {
     private MongoDatabase database;
-    private String dbName="airbaseDB";
-    private String hostName="localhost";
-    private int port=27017;
-    private String userName="urh";
-    private String passWord="passUrh";
-    private String ClientCollectionName="colClients";
+    private String dbName="airbase";
+
+    private String ClientCollectionName="clients";
 
 
     public static void main( String args[] ) {
         try{
             Client client = new Client();
-            //client.dropCollectionClient(client.ClientCollectionName);
-            //client.createCollectionClient(client.ClientCollectionName);
-            //client.deleteClients(client.ClientCollectionName, new Document());
-            //client.testInsertOneClient();
-            client.testInsertManyClients();
-            //client.getClientById(client.ClientCollectionName, 7934);
-            //client.getAllClients(client.ClientCollectionName);
-            // Afficher tous les employ�s sans tri ni projection
-            //client.getClients(client.ClientCollectionName,
-            //	new Document(),
-            //	new Document(),
-            //	new Document());
-            // Afficher tous les employ�s salesman du d�partement 30
-            // Tri� en ordre croissant sur _id
-            // Projet� sur _id, ename, job, clientno et adresse
-		/*
-		client.getClients(client.ClientCollectionName,
-			new Document(),
-			new Document(),
-			new Document()
-		);
-		*/
-		/*
-		client.updateClients(client.ClientCollectionName,
-		new Document("_id", 30),
-		new Document ("$set", new Document("loc", "Saratoga") ),
-		new UpdateOptions()
-		);
-		*/
+            String str = "";
 
-            //client.deleteClients(client.ClientCollectionName, new Document());
-            //client.deleteClients(client.ClientCollectionName, new Document("_id", 7369));
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -86,19 +47,13 @@ public class Client {
      - Chargement du pointeur vers la base RH
      */
     Client(){
-        // Creating a Mongo client
 
-        MongoClient mongoClient = new MongoClient( hostName , port );
+        MongoClientURI uri = new MongoClientURI("mongodb://test:<password>@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority");
 
-        // Creating Credentials
-        // RH : Ressources Humaines
-        MongoCredential credential;
-        credential = MongoCredential.createCredential(userName, dbName,
-                passWord.toCharArray());
+        MongoClient mongoClient = new MongoClient(uri);
+        MongoDatabase database = mongoClient.getDatabase("airbase");
+
         System.out.println("Connected to the database successfully");
-        System.out.println("Credentials ::"+ credential);
-        // Accessing the database
-        database = mongoClient.getDatabase(dbName);
 
     }
 
