@@ -3,9 +3,10 @@ package project;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
+import java.util.List;<<<<<<<HEAD
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.Logger;=======
+import java.util.Set;>>>>>>>48 c9dac9b1e3124b7a833de2807071f781788619
 
 import org.bson.Document;
 
@@ -18,13 +19,14 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 
 public class Client {
-	private MongoDatabase database;
+	private MongoClient mongoClient;
 	private String dbName = "airbase";
-
 	private String ClientCollectionName = "clients";
+	private MongoDatabase database;
 
 	public static void main(String args[]) {
 		Client client = new Client();
+		client.mongoClient.close();
 	}
 
 	/**
@@ -41,13 +43,19 @@ public class Client {
 
 		try {
 			Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
-			MongoClient mongoClient = MongoClients.create(mongodbUri);
+			mongoClient = MongoClients.create(mongodbUri);
 			List<Document> databases = mongoClient.listDatabases().into(new ArrayList());
+			System.out.println(" ******* liste des BDs : *******");
 			for (Document db : databases) {
 				System.out.println(db.toJson());
 			}
 
-			mongoClient.close();
+			database = mongoClient.getDatabase("airbase");
+			System.out.println("******* liste des collections *******");
+			for (String coll : database.listCollectionNames()) {
+				System.out.println(coll);
+			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
