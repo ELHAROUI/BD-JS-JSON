@@ -1,11 +1,19 @@
 package project;
 
+<<<<<<< HEAD
+=======
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+>>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import com.google.gson.Gson;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
@@ -20,13 +28,27 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 
 public class Client {
+<<<<<<< HEAD
 	
 	private MongoDatabase database;
 	private String dbName = "airbase";
 	MongoClient mongoClient;
 
+=======
+	private MongoClient mongoClient;
+	private String dbName = "airbase";
+>>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 	private String ClientCollectionName = "clients";
+	private MongoDatabase database;
+    private MongoCollection<Document> collection;
 
+	public static void main(String args[]) throws FileNotFoundException {
+		Client client = new Client();
+		//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
+		//client.loadOneClientFromJsonFile("src/main/resources/Airbase.json");
+		client.mongoClient.close();
+
+<<<<<<< HEAD
 	public static void main(String args[]) {
 		try {
 			
@@ -41,6 +63,8 @@ public class Client {
 		}
 		
 		
+=======
+>>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 	}
 
 	/**
@@ -51,23 +75,37 @@ public class Client {
 	 - Cr�ation d'un utilisateur appel�
 	 - Chargement du pointeur vers la base RH
 	 */
-	Client() {
+	public Client() {
 
 		String mongodbUri = "mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
 
+<<<<<<< HEAD
 		mongoClient = MongoClients.create(mongodbUri);
 		
 		// liste des BDS
+=======
+>>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 		try {
-			
+			Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
+			mongoClient = MongoClients.create(mongodbUri);
+			List<Document> databases = mongoClient.listDatabases().into(new ArrayList());
 			System.out.println(" ******* liste des BDs : *******");
-			for (String db : mongoClient.listDatabaseNames()) {			
-				System.out.println(db);
+			for (Document db : databases) {
+				System.out.println(db.toJson());
 			}
+
+			database = mongoClient.getDatabase("airbase");
+			System.out.println("******* liste des collections *******");
+			for (String coll : database.listCollectionNames()) {
+				System.out.println(coll);
+			}
+
+			this.collection = database.getCollection("clients");
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+<<<<<<< HEAD
 		
 		// liste des collections
 		try {
@@ -83,6 +121,10 @@ public class Client {
 		}
 	
 		}
+=======
+
+	}
+>>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 
 	/**
 	 Cette fonction permet de cr�er une collection
@@ -359,8 +401,16 @@ public class Client {
 	 Cr�er pour cela un fichier contenant un seul json
 	 Trouver les bons param�tres.
 	 */
-	public void loadOneClientFromJsonFile() {
+	public void loadOneClientFromJsonFile(String path) throws FileNotFoundException {
 		// A compl�ter
+		BufferedReader reader = new BufferedReader(new FileReader(path));
+
+		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
+		Gson gson = new Gson();
+
+			String json = gson.toJson(clientObj[0]);
+			Document myDoc = Document.parse(json);
+		    collection.insertOne(myDoc);
 	}
 
 	/**
@@ -368,8 +418,21 @@ public class Client {
 	 Utilisez le fichier 2Json_collection_Import_Clients_Airbase.json vu dans le cours
 	 Trouver les bons param�tres.
 	 */
-	public void loadManyClientsFromJsonFile() {
+	public void loadManyClientsFromJsonFile(String path) throws FileNotFoundException {
 		// A compl�ter
+		BufferedReader reader = new BufferedReader(new FileReader(path));
+
+		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
+		Gson gson = new Gson();
+		List<Document> doc = new ArrayList<>();
+		for (int j=0; j <clientObj.length; j++){
+			String json = gson.toJson(clientObj[j]);
+			Document myDoc = Document.parse(json);
+			doc.add(myDoc);
+		}
+
+		collection.insertMany(doc);
+		String str = "";
 	}
 
 	/**
