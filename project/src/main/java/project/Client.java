@@ -3,6 +3,7 @@ package project;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -10,7 +11,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
+import com.mongodb.DBObject;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
@@ -20,6 +22,10 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Client {
 	private MongoClient mongoClient;
@@ -28,10 +34,10 @@ public class Client {
 	private MongoDatabase database;
     private MongoCollection<Document> collection;
 
-	public static void main(String args[]) throws FileNotFoundException {
+	public static void main(String args[]) throws IOException, ParseException {
 		Client client = new Client();
 		//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
-		//client.loadOneClientFromJsonFile("src/main/resources/Airbase.json");
+		client.loadOneClientFromJsonFile("src/main/resources/Airbase.json",2);
 		client.mongoClient.close();
 
 	}
@@ -337,16 +343,34 @@ public class Client {
 	 Cr�er pour cela un fichier contenant un seul json
 	 Trouver les bons param�tres.
 	 */
-	public void loadOneClientFromJsonFile(String path) throws FileNotFoundException {
+	public void loadOneClientFromJsonFile(String path, int position) throws IOException {
 		// A compl�ter
 		BufferedReader reader = new BufferedReader(new FileReader(path));
 
-		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
+		int intValueOfChar;
+		String targetString = "";
+		while ((intValueOfChar = reader.read()) != -1) {
+			targetString += (char) intValueOfChar;
+		}
+		reader.close();
 		Gson gson = new Gson();
+		JsonParser jsonParser = new JsonParser();
+		JsonArray jsonArray = (JsonArray) jsonParser.parse(targetString);
 
-			String json = gson.toJson(clientObj[0]);
+		if (position!=0)
+		{	JsonElement first= jsonArray.get(position-1);
+		    String json= first.toString();
+		    Document myDoc = Document.parse(json);
+			collection.insertOne(myDoc);
+		}
+		else if (position==0) {
+			JsonElement first= jsonArray.get(position);
+			String json= first.toString();
 			Document myDoc = Document.parse(json);
-		    collection.insertOne(myDoc);
+			collection.insertOne(myDoc);
+		}
+
+
 	}
 
 	/**
@@ -354,20 +378,36 @@ public class Client {
 	 Utilisez le fichier 2Json_collection_Import_Clients_Airbase.json vu dans le cours
 	 Trouver les bons param�tres.
 	 */
-	public void loadManyClientsFromJsonFile(String path) throws FileNotFoundException {
+	public void loadManyClientsFromJsonFile(String path) throws IOException {
 		// A compl�ter
 		BufferedReader reader = new BufferedReader(new FileReader(path));
-
-		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
-		Gson gson = new Gson();
 		List<Document> doc = new ArrayList<>();
-		for (int j=0; j <clientObj.length; j++){
-			String json = gson.toJson(clientObj[j]);
-			Document myDoc = Document.parse(json);
-			doc.add(myDoc);
-		}
 
-		collection.insertMany(doc);
+		int intValueOfChar;
+		String targetString = "";
+		while ((intValueOfChar = reader.read()) != -1) {
+			targetString += (char) intValueOfChar;
+		}
+		reader.close();
+		Gson gson = new Gson();
+		JsonParser jsonParser = new JsonParser();
+		JsonArray jsonArray = (JsonArray) jsonParser.parse(targetString);
+
+
+
+
+
+		for (int j=0; j <jsonArray.size() -1; j++){
+			JsonElement first= jsonArray.get(j);
+			String json= first.toString();
+			Document myDoc = Document.parse(json);
+		    doc.add(myDoc);
+	}
+
+	   collection.insertMany(doc);
+
+
+
 		String str = "";
 	}
 
