@@ -3,10 +3,9 @@ package project;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;<<<<<<<HEAD
+import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;=======
-import java.util.Set;>>>>>>>48 c9dac9b1e3124b7a833de2807071f781788619
+import java.util.logging.Logger;
 
 import org.bson.Document;
 
