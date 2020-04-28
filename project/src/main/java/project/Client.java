@@ -1,5 +1,8 @@
 package project;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -7,6 +10,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gson.Gson;
 import org.bson.Document;
 
 import com.mongodb.client.FindIterable;
@@ -22,10 +26,13 @@ public class Client {
 	private String dbName = "airbase";
 	private String ClientCollectionName = "clients";
 	private MongoDatabase database;
+    private MongoCollection<Document> collection;
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws FileNotFoundException {
 		Client client = new Client();
+		client.loadManyClientsFromJsonFile();
 		client.mongoClient.close();
+
 	}
 
 	/**
@@ -54,6 +61,8 @@ public class Client {
 			for (String coll : database.listCollectionNames()) {
 				System.out.println(coll);
 			}
+
+			this.collection = database.getCollection("clients");
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -336,8 +345,21 @@ public class Client {
 	 Utilisez le fichier 2Json_collection_Import_Clients_Airbase.json vu dans le cours
 	 Trouver les bons param�tres.
 	 */
-	public void loadManyClientsFromJsonFile() {
+	public void loadManyClientsFromJsonFile() throws FileNotFoundException {
 		// A compl�ter
+		BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/Airbase.json"));
+
+		ClientObj[] clientObj = new Gson().fromJson(reader, ClientObj[].class);
+		Gson gson = new Gson();
+		List<Document> doc = new ArrayList<>();
+		for (int j=0; j <clientObj.length; j++){
+			String json = gson.toJson(clientObj[j]);
+			Document myDoc = Document.parse(json);
+			doc.add(myDoc);
+		}
+
+		collection.insertMany(doc);
+		String str = "";
 	}
 
 	/**
