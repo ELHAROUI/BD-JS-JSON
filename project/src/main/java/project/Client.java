@@ -1,20 +1,24 @@
 package project;
 
-<<<<<<< HEAD
-=======
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
->>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import org.bson.Document;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
@@ -28,43 +32,35 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.gte;
 
 public class Client {
-<<<<<<< HEAD
-	
-	private MongoDatabase database;
-	private String dbName = "airbase";
-	MongoClient mongoClient;
 
-=======
+	private MongoDatabase database;
 	private MongoClient mongoClient;
 	private String dbName = "airbase";
->>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
+
 	private String ClientCollectionName = "clients";
-	private MongoDatabase database;
+
     private MongoCollection<Document> collection;
 
-	public static void main(String args[]) throws FileNotFoundException {
-		Client client = new Client();
-		//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
-		//client.loadOneClientFromJsonFile("src/main/resources/Airbase.json");
-		client.mongoClient.close();
 
-<<<<<<< HEAD
-	public static void main(String args[]) {
+	public static void main(String args[]) throws FileNotFoundException {
 		try {
 			
 			Client client = new Client();
 			
+			
+			
 			// pour chercher selon la ville (Taper la ville souhaiter)
-			client.findByTown("Toulouse");
+			client.findByTown("Paris");
+			
+			//client.loadManyClientsFromJsonFile("src/main/resources/Airbase.json");
+			//client.loadOneClientFromJsonFile("src/main/resources/Airbase.json");
+			client.mongoClient.close();
 			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		
-=======
->>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
 	}
 
 	/**
@@ -79,12 +75,10 @@ public class Client {
 
 		String mongodbUri = "mongodb://test:test@cluster0-shard-00-00-d9c8u.mongodb.net:27017,cluster0-shard-00-01-d9c8u.mongodb.net:27017,cluster0-shard-00-02-d9c8u.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true&w=majority";
 
-<<<<<<< HEAD
+
 		mongoClient = MongoClients.create(mongodbUri);
 		
-		// liste des BDS
-=======
->>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
+
 		try {
 			Logger.getLogger("org.mongodb.driver").setLevel(Level.WARNING);
 			mongoClient = MongoClients.create(mongodbUri);
@@ -105,26 +99,9 @@ public class Client {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-<<<<<<< HEAD
-		
-		// liste des collections
-		try {
-			
-			MongoDatabase database = mongoClient.getDatabase("airbase");	
-			System.out.println("******* liste des collections : ");
-		for (String coll : database.listCollectionNames()) {			
-			System.out.println(coll);
-		}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	
-		}
-=======
-
 	}
->>>>>>> da25ff2d1ace5e9751a935b3b98eeef2f64023bf
+
+
 
 	/**
 	 Cette fonction permet de cr�er une collection
@@ -364,18 +341,54 @@ public class Client {
 	/**
 	 1.6.2 Afficher tous les clients habitant Une ville donn�es et ayant plus d'un prenom
 	 Trouver les bons param�tres.
+	 * @throws ParseException 
 	 */
-	public void findByTown(String ville) {
+	public void findByTown(String ville) throws ParseException {
 		
 		MongoDatabase bd = mongoClient.getDatabase("airbase");
 		MongoCollection<Document> collection = bd.getCollection("clients");
 		
-		List<Document> studentList = collection.find(eq("adresse.ville", ville)).into(new ArrayList<>());
-		System.out.println("Student list with an ArrayList:");
-		for (Document student : studentList) {
-		    System.out.println(student);
-		    
+		List<Document> myDoc = collection.find(eq("adresse.ville", ville)).into(new ArrayList<>());
+		System.out.println("");
+		System.out.println(" ************** Les clients habitant : / "+ville+" / et ayant plus d'un prenom **************");
+		
+		for (Document doc : myDoc) {
+				
+			JSONParser jsonParser = new JSONParser();
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(doc.toJson());
+			JSONArray jsonArray = (JSONArray) jsonObject.get("prenom");
+			
+			// Pour compter les prenoms
+			int compteurPrenom = 0;
+			
+			Iterator<String> iterator = jsonArray.iterator();
+			while(iterator.hasNext()) {
+				iterator.next();
+				compteurPrenom ++;
+				
+			}
+			//System.out.println(compteurPrenom);
+			if (compteurPrenom > 1)
+			{
+				System.out.println(doc.toJson());
+			}
+			jsonObject.clear();
+			
 		}
+		
+
+			//JsonObject obj = new JsonParser().parse(myDoc.get(0).toJson()).getAsJsonObject();
+			//System.out.println(obj);
+		
+			/*JSONParser jsonParser = new JSONParser();
+			JSONObject jsonObject = (JSONObject) jsonParser.parse(myDoc.get(0).toJson());
+			JSONArray jsonArray = (JSONArray) jsonObject.get("prenom");
+			
+			Iterator<String> iterator = jsonArray.iterator();
+			while(iterator.hasNext()) {
+			   System.out.println(iterator.next());
+			}*/
+
 	}
 
 	/**
